@@ -3,6 +3,7 @@ import express from 'express'
 import mongoose from 'mongoose'
 import cors from 'cors'
 import morgan from 'morgan'
+import routes from './routes'
 
 dotenv.config()
 
@@ -13,7 +14,7 @@ app.use(morgan('dev'))
 app.use(express.json())
 app.use(express.urlencoded())
 
-//databse
+//database
 const URI = process.env.MONGO_URL
 mongoose.connect(URI, {
   autoIndex: false,
@@ -22,9 +23,8 @@ mongoose.connect(URI, {
   console.log('Mongodb connected.')
 })
 
-app.get('/', (req, res) => {
-  res.json({msg: 'Hello world!' })
-})
+// Routes
+app.use('/api', routes)
 
 
 const PORT = process.env.PORT || 2829
