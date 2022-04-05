@@ -1,12 +1,20 @@
 import Products from '../models/productModel'
+import { ApiProduct } from '../lib/productLib'
 
 const productController = {
   getProducts: async (req, res) => {
-    try {
-      const products = await Products.find()
-
-      return res.status(200).json(products)
-
+    try {     
+      const libProduct = new ApiProduct(Products.find(), req.query).paginating().sorting().search().filter()
+      const result = await Promise.allSettled([
+        libProduct.query,
+        Products.countDocuments()
+      ])
+      const pageCurrent = req.query.page
+      const limitCurrent = libProduct.query.options.limit
+      const products = result[0].status === 'fulfilled' ? result[0].value : []
+      const count = result[1].status === 'fulfilled' ? result[1].value : 0
+      
+      return res.status(200).json({ products, count, page: pageCurrent, limit: limitCurrent })
     } catch (error) {
       return res.status(500).json({msg: error.message})
     }
